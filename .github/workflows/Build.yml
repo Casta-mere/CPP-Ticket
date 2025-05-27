@@ -1,0 +1,142 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "V*"
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build frontend in Docker
+        run: |
+          docker build -t cpp-ticket-frontend -f Frontend/Dockerfile Frontend
+          docker create --name extract cpp-ticket-frontend
+          docker cp extract:/cpp-ticket/out_exported ./Frontend/static
+          docker rm extract
+
+      - name: Upload static files
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download static files
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static
+
+      - name: Install Python dependencies
+        run: pip install pyinstaller
+
+      - name: Build Linux binary with .spec
+        run: pyinstaller run.spec
+
+      - name: Package Linux binary zip
+        run: zip -j run-linux.zip dist/run
+
+      - name: Upload Linux zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-linux
+          path: run-linux.zip
+
+  build-windows:
+    runs-on: windows-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download static files
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static
+
+      - name: Install Python dependencies
+        run: pip install pyinstaller
+
+      - name: Build Windows binary with .spec
+        run: pyinstaller run.spec
+
+      - name: Package Windows binary zip
+        run: powershell Compress-Archive -Path dist/run.exe -DestinationPath run-windows.zip
+
+      - name: Upload Windows zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-windows
+          path: run-windows.zip
+
+  build-macos:
+    runs-on: macos-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download static files
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static
+
+      - name: Install Python dependencies
+        run: pip3 install pyinstaller
+
+      - name: Build macOS binary with .spec
+        run: pyinstaller run.spec
+
+      - name: Package macOS binary zip
+        run: zip -j run-macos.zip dist/run
+
+      - name: Upload macOS zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-macos
+          path: run-macos.zip
+
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Linux zip
+        uses: actions/download-artifact@v4
+        with:
+          name: run-linux
+          path: artifacts/
+
+      - name: Download Windows zip
+        uses: actions/download-artifact@v4
+        with:
+          name: run-windows
+          path: artifacts/
+
+      - name: Download macOS zip
+        uses: actions/download-artifact@v4
+        with:
+          name: run-macos
+          path: artifacts/
+
+      - name: Create GitHub Release with zip files
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            artifacts/run-linux/run-linux.zip
+            artifacts/run-windows/run-windows.zip
+            artifacts/run-macos/run-macos.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
