@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    image: cpp-ticket-frontend:${VERSION}
+    volumes:
+      - cpp_node_modules:/cpp-ticket/node_modules
+      - ./Frontend/cpp-ticket:/cpp-ticket
+      - ./Frontend/static:/cpp-ticket/out_exported
+    working_dir: /cpp-ticket
+    command: >
+      sh -c "npm install && npm run build && cp -r out/* out_exported/"
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cpp-ticket-backend:${VERSION}
+    depends_on:
+      frontend:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/cpp-ticket
+    entrypoint: ["/entrypoint.sh"]
+    restart: "no"
+
+volumes:
+  cpp_node_modules:
