@@ -5,6 +5,7 @@ import requests
 import logging
 import json
 import time
+from requests.exceptions import ProxyError, RequestException
 
 logger = logging.getLogger("uvicorn")
 
@@ -42,19 +43,28 @@ class LoginManager:
 
     def login(self, account: str, password: str):
         data = f"account={account}&password={password}&phoneAccountBindToken=undefined&thirdAccountBindToken=undefined"
-        response = requests.post(LOGIN_URL, headers=HEADERS, data=data)
-        logger.info(response.json())
-        logger.info(response)
-        if response.status_code == 200:
-            self.loggedIn = True
-            self.account = account
-            self.cookies = response.cookies.get_dict()
-            self._save_cookies()
-            self._get_user_info()
-            return {"success": True, "cookies": self.cookies}
-        elif  response.json()["description"] :
-            return {"success": False, "errormsg": response.json()["description"]}
-        return {"success": False, "errormsg": "出现未知问题"}
+        try:
+            response = requests.post(LOGIN_URL, headers=HEADERS, data=data)
+            logger.info(response.json())
+            logger.info(response)
+            if response.status_code == 200:
+                self.loggedIn = True
+                self.account = account
+                self.cookies = response.cookies.get_dict()
+                self._save_cookies()
+                self._get_user_info()
+                return {"success": True, "cookies": self.cookies}
+            elif response.json().get("description"):
+                return {"success": False, "errormsg": response.json()["description"]}
+            return {"success": False, "errormsg": "出现未知问题"}
+
+        except ProxyError as e:
+            logger.error("Proxy error occurred during login: %s", e)
+            return {"success": False, "errormsg": "代理出问题了，关了你的梯子再试试"}
+
+        except RequestException as e:
+            logger.error("Request failed during login: %s", e)
+            return {"success": False, "errormsg": "网络请求失败，请稍后重试"}
 
     def get_cookie(self, account: str):
         self.account = account
