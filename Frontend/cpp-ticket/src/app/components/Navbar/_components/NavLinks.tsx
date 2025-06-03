@@ -1,3 +1,4 @@
+"use client";
 import { usePathname } from "next/navigation";
 import { RiDashboardFill } from "react-icons/ri";
 import Link from "next/link";
