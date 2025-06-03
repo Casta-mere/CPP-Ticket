@@ -1,4 +1,4 @@
-import { Footer, NavBar } from "@/app/components";
+import { Footer, NavBar, StepSidebar } from "@/app/components";
 import { Container, Flex, Theme } from "@radix-ui/themes";
 import "@radix-ui/themes/styles.css";
 import type { Metadata } from "next";
@@ -33,6 +33,8 @@ export default function RootLayout({
         <Theme appearance="light" accentColor="violet" radius="large">
           <Flex direction="column" className="min-h-screen">
             <NavBar />
+
+            <StepSidebar />
             <main className="p-5">
               <Container>{children}</Container>
             </main>
