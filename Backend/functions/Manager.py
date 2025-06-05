@@ -173,7 +173,7 @@ class Manager:
             res = response.json()
             logger.info(res)
             self.buyerInfo = res
-            logger.info(f"Fetched {len(res)} Buyers: {[i["realname"] for i in self.buyerInfo]}")
+            logger.info(f"Fetched {len(res)} Buyers: {[i['realname'] for i in self.buyerInfo]}")
         except requests.RequestException as e:
             logger.error("Failed to fetch user info: %s", e)
         except ValueError as e:
