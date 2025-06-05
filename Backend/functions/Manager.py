@@ -1,5 +1,5 @@
 # Author: Casta-mere
-from .constants import HEADERS, LOGIN_URL, DB_PATH, CREATE_DB, USER_INFO_URL
+from .constants import BUYER_URL, HEADERS, LOGIN_URL, DB_PATH, CREATE_DB, USER_INFO_URL
 import sqlite3
 import requests
 import logging
@@ -9,7 +9,7 @@ from requests.exceptions import ProxyError, RequestException
 
 logger = logging.getLogger("uvicorn")
 
-class LoginManager:
+class Manager:
 
     def  __init__(self):
         self._create_table()
@@ -17,6 +17,8 @@ class LoginManager:
         self.cookies = None
         self.loggedIn = False
         self.userInfo = {}
+        self.buyerInfo = {}
+        self.selectedBuyer = []
         self._load_if_exists()
 
     def _get_conn(self):
@@ -24,7 +26,8 @@ class LoginManager:
 
     def _create_table(self):
         with self._get_conn() as conn:
-            conn.execute(CREATE_DB)
+            for sql in CREATE_DB:
+                conn.execute(sql)
 
     def _load_if_exists(self):
         with self._get_conn() as conn:
@@ -37,6 +40,8 @@ class LoginManager:
                 if self._is_cookie_valid(self.cookies):
                     self.loggedIn = True
                     self._get_user_info()
+                    self._get_buyer_info()
+                    self._load_buyer()
                 else:
                     self.account = None
                     self.cookies = None
@@ -53,6 +58,7 @@ class LoginManager:
                 self.cookies = response.cookies.get_dict()
                 self._save_cookies()
                 self._get_user_info()
+                self._get_buyer_info()
                 return {"success": True, "cookies": self.cookies}
             elif response.json().get("description"):
                 return {"success": False, "errormsg": response.json()["description"]}
@@ -99,10 +105,54 @@ class LoginManager:
     def logout(self):
         with self._get_conn() as conn:
             conn.execute("DELETE FROM cookies WHERE account = ?", (self.account,))
+        self._delete_Buyer()
+        self.buyerInfo = {}
         self.loggedIn = False
         self.account = None
         self.cookies = None
         self.userInfo = {}
+
+    def selectBuyer(self, buyers):
+        try:
+            self._delete_Buyer()
+            for i in buyers:
+                data =  next((item for item in self.buyerInfo if item["id"] == eval(i)), None)
+                logger.info(f"ready to insert {data}")
+                self._insert_buyer(data)
+            self._load_buyer()
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "errormsg": e}
+
+    def _insert_buyer(self, data):
+        with self._get_conn() as conn:
+            conn.execute(
+                """
+                INSERT INTO selectedBuyer (id, realname, idcard, mobile, validType)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    data["id"],
+                    data["realname"],
+                    data.get("idcard"),
+                    data.get("mobile"),
+                    data.get("validType"),
+                )
+            )
+
+    def _load_buyer(self):
+        with self._get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM selectedBuyer")
+            row = cur.fetchall()
+            if row: self.selectedBuyer = row
+    
+    def _delete_Buyer(self):
+        self.selectedBuyer = []
+        with self._get_conn() as conn:
+            conn.execute(
+                "DELETE FROM selectedBuyer" 
+            )
 
     def _get_user_info(self):
         try:
@@ -117,7 +167,31 @@ class LoginManager:
         except ValueError as e:
             logger.error("Failed to parse JSON response: %s", e)
 
+    def _get_buyer_info(self):
+        try:
+            response = requests.get(BUYER_URL, headers=HEADERS, cookies=self.cookies)
+            res = response.json()
+            logger.info(res)
+            self.buyerInfo = res
+            logger.info(f"Fetched {len(res)} Buyers: {[i["realname"] for i in self.buyerInfo]}")
+        except requests.RequestException as e:
+            logger.error("Failed to fetch user info: %s", e)
+        except ValueError as e:
+            logger.error("Failed to parse JSON response: %s", e)
+
     def get_user_info(self):
         if self.loggedIn:
             return self.userInfo
+        else: return None
+
+    def get_buyer_info(self):
+        if self.loggedIn:
+            self._get_buyer_info()
+            return self.buyerInfo
+        else: return None
+
+    def get_selected_buyer_info(self):
+        logger.info(self.selectedBuyer)
+        if self.loggedIn:
+            return self.selectedBuyer
         else: return None

@@ -16,12 +16,22 @@ HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0'
 }
 LOGIN_URL = "https://user.allcpp.cn/api/login/normal"
+BUYER_URL = "https://www.allcpp.cn/allcpp/user/purchaser/getList.do"
 USER_INFO_URL = "https://user.allcpp.cn/rest/my"
-CREATE_DB = """CREATE TABLE IF NOT EXISTS cookies (
+CREATE_DB = ["""CREATE TABLE IF NOT EXISTS cookies (
                     account TEXT PRIMARY KEY,
                     cookies_dict TEXT NOT NULL,
                     timestamp INTEGER
                 )
+            """,
             """
+            CREATE TABLE IF NOT EXISTS selectedBuyer (
+                    id INTEGER PRIMARY KEY,
+                    realname TEXT NOT NULL,
+                    idcard TEXT,
+                    mobile TEXT,
+                    validType INTEGER
+                );
+            """]
 DB_PATH = ".cookies.db"
 BACKEND_PORT = "4869"

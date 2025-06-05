@@ -4,7 +4,8 @@ import sys
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from .functions.login import LoginManager
+from .functions.Manager import Manager
+from typing import List
 from pydantic import BaseModel
 import uvicorn
 import logging
@@ -16,7 +17,7 @@ origins = [
     "http://127.0.0.1:8555", 
 ]
 
-loginmanager = LoginManager()
+manager = Manager()
 
 app = FastAPI()
 app.add_middleware(
@@ -31,26 +32,44 @@ class LoginRequest(BaseModel):
     account: str
     password: str
 
+class selectBuyerRequest(BaseModel):
+    selected: List[str]
+
 @app.post("/api/login")
 async def login(req: LoginRequest):
     logger.info("Login attempt with account: %s, password: %s", req.account, req.password)
-    result = loginmanager.login(req.account, req.password)
+    result = manager.login(req.account, req.password)
     return result
 
 @app.get("/api/login")
 async def loggedIn():
-    if loginmanager._is_loggedIn():
+    if manager._is_loggedIn():
         return {"loggedIn": True}
     return {"loggedIn": False}
 
 @app.get("/api/user")
 async def userInfo():
-    return loginmanager.get_user_info()
+    return manager.get_user_info()
+
+@app.get("/api/buyer")
+async def buyerInfo():
+    return manager.get_buyer_info()
+
+
+@app.get("/api/selectBuyer")
+async def selectedBuyerInfo():
+    return manager.get_selected_buyer_info()
 
 @app.post("/api/logout")
 async def logout():
-    logger.info(f"Logout for {loginmanager.account}")
-    loginmanager.logout()
+    logger.info(f"Logout for {manager.account}")
+    manager.logout()
+
+@app.post("/api/selectBuyer")
+async def selectBuyer(req: selectBuyerRequest):
+    logger.info(f"Select {req.selected}")
+    result = manager.selectBuyer(req.selected)
+    return result
 
 def get_static_dir():
     if hasattr(sys, "_MEIPASS"):
