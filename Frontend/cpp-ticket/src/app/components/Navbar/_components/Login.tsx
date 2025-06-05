@@ -216,11 +216,7 @@ export const LoginComponent = () => {
               >
                 取消
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                onClick={() => setIsOpen(false)}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "请稍等…" : "登录"}
               </Button>
             </Flex>
