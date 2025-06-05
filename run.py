@@ -6,8 +6,10 @@ from Backend.server import run_backend
 from Backend.server import app
 from Backend.ui import BackendAppUI
 from Backend.functions.logger import setup_logger
+from Backend.functions.single_instance import ensure_single_instance
 
 if __name__ == "__main__":
+    lock = ensure_single_instance()
     logger = setup_logger("uvicorn") 
     logger.info("Server started")
     app_ui = BackendAppUI(run_backend_func=run_backend, app=app)
