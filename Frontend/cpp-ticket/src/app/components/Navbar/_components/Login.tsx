@@ -96,6 +96,7 @@ export const LoginComponent = () => {
       const data = await res.json();
       setIsLoggedIn(data.loggedIn);
       setUserInfo(null);
+      setIsOpen(false);
       window.dispatchEvent(new Event("logout-success"));
       window.dispatchEvent(new Event("select-success"));
     } catch (error) {
