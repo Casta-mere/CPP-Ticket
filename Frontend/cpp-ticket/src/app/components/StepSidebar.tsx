@@ -1,39 +1,13 @@
 "use client";
 import { Box, Card, Flex, Heading, Text } from "@radix-ui/themes";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useSelectedBuyer, useUser, Draggable } from "@/app/components";
 
 export default function StepSidebar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [buyer, setBuyer] = useState(false);
+  const { isLoggedIn } = useUser();
+  const { isSelected } = useSelectedBuyer();
   const [ticket, setTicket] = useState(false);
-
-  const fetchLoginStatus = useCallback(async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:8765/api/login");
-      const data = await res.json();
-      setIsLoggedIn(Boolean(data.loggedIn));
-    } catch (error) {
-      console.error("Error fetching login status:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchLoginStatus();
-  }, [fetchLoginStatus]);
-
-  useEffect(() => {
-    const onLogin = () => fetchLoginStatus();
-    const onLogout = () => fetchLoginStatus();
-
-    window.addEventListener("login-success", onLogin);
-    window.addEventListener("logout-success", onLogout);
-
-    return () => {
-      window.removeEventListener("login-success", onLogin);
-      window.removeEventListener("logout-success", onLogout);
-    };
-  }, [fetchLoginStatus]);
 
   const Step1 = () => {
     return (
@@ -65,7 +39,7 @@ export default function StepSidebar() {
     return (
       <Flex justify="between">
         <Text size="4">2️⃣ 选择购票人</Text>
-        <Text size="4">{buyer ? "✔" : "✖"}</Text>
+        <Text size="4">{isSelected ? "✔" : "✖"}</Text>
       </Flex>
     );
   };
@@ -80,7 +54,11 @@ export default function StepSidebar() {
   };
 
   return (
-    <div className="fixed top-24 left-5 w-72 z-50">
+    <Draggable
+      initialX={50}
+      initialY={100}
+      className="w-72 cursor-grab active:cursor-grabbing"
+    >
       <Box maxWidth="300px" p="4">
         <Card size="2" className="shadow-xl">
           <Heading>抢票流程</Heading>
@@ -91,6 +69,6 @@ export default function StepSidebar() {
           </Flex>
         </Card>
       </Box>
-    </div>
+    </Draggable>
   );
 }

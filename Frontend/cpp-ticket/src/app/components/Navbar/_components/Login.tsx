@@ -97,6 +97,7 @@ export const LoginComponent = () => {
       setIsLoggedIn(data.loggedIn);
       setUserInfo(null);
       window.dispatchEvent(new Event("logout-success"));
+      window.dispatchEvent(new Event("select-success"));
     } catch (error) {
       console.error("登出失败", error);
     }
