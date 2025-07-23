@@ -6,7 +6,7 @@ import classNames from "classnames";
 
 const navLinks = [
   { label: <RiDashboardFill />, href: "/" },
-  { label: "Work Space", href: "/note" },
+  { label: "Events", href: "/events" },
 ];
 
 const NavLinksComponent = () => {
