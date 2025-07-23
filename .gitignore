@@ -1,3 +1,5 @@
 build
 static
 __pycache__
+dist
+.data

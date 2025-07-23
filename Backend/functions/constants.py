@@ -17,6 +17,7 @@ HEADERS = {
 }
 LOGIN_URL = "https://user.allcpp.cn/api/login/normal"
 BUYER_URL = "https://www.allcpp.cn/allcpp/user/purchaser/getList.do"
+EVENTS_URL = "https://www.allcpp.cn/allcpp/event/eventMainListV2.do?time=8&sort=1&pageNo=1&pageSize=1000"
 USER_INFO_URL = "https://user.allcpp.cn/rest/my"
 CREATE_DB = ["""CREATE TABLE IF NOT EXISTS cookies (
                     account TEXT PRIMARY KEY,
@@ -33,5 +34,6 @@ CREATE_DB = ["""CREATE TABLE IF NOT EXISTS cookies (
                     validType INTEGER
                 );
             """]
-DB_PATH = ".cookies.db"
+DB_PATH = ".data/.db"
+EVENTS_FILE_PATH = ".data/.events.json"
 BACKEND_PORT = "4869"

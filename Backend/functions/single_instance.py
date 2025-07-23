@@ -4,7 +4,7 @@ from filelock import FileLock, Timeout
 import os
 import sys
 
-def ensure_single_instance(lock_filename: str = ".app.lock"):
+def ensure_single_instance(lock_filename: str = ".data/.app.lock"):
     lock_path = os.path.join(os.path.dirname(sys.argv[0]), lock_filename)
     lock = FileLock(lock_path)
 
