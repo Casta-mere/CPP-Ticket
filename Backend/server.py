@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from .functions.Manager import Manager
+from .functions.TicketManager import TicketManager
 from typing import List
 from pydantic import BaseModel
 import uvicorn
@@ -18,6 +19,7 @@ origins = [
 ]
 
 manager = Manager()
+ticketManager = TicketManager()
 
 app = FastAPI()
 app.add_middleware(
@@ -70,6 +72,18 @@ async def selectBuyer(req: selectBuyerRequest):
     logger.info(f"Select {req.selected}")
     result = manager.selectBuyer(req.selected)
     return result
+
+@app.get("/api/events")
+async def getEvents():
+    return {"events": ticketManager.get_events()}
+
+@app.get("/api/events/updatetime")
+async def getEventsUpdate():
+    return {"updatedAt": ticketManager.get_last_update_time()}
+
+@app.post("/api/events/update")
+async def EventsUpdate():
+    ticketManager.update_events()
 
 def get_static_dir():
     if hasattr(sys, "_MEIPASS"):
