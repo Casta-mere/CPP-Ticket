@@ -1,0 +1,93 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "V*"
+  workflow_dispatch:
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create docker volume
+        run: docker volume create cpp_node_modules
+
+      - name: Build frontend image
+        run: docker build -t cpp-ticket-frontend:${{ github.ref_name }} -f Frontend/Dockerfile Frontend
+
+      - name: Run frontend container to build static files
+        run: |
+          docker run --rm \
+            -v cpp_node_modules:/cpp-ticket/node_modules \
+            -v ${{ github.workspace }}/Frontend/cpp-ticket:/cpp-ticket \
+            -v ${{ github.workspace }}/Frontend/static:/cpp-ticket/out_exported \
+            cpp-ticket-frontend:${{ github.ref_name }}
+
+      - name: Upload static files
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static/
+
+  build-windows:
+    runs-on: windows-latest
+    needs: build-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download static files
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-static
+          path: Frontend/static
+
+      - name: Configure pip to use Tsinghua mirror
+        run: |
+          mkdir %USERPROFILE%\.pip
+          echo [global] > %USERPROFILE%\.pip\pip.ini
+          echo index-url = https://pypi.tuna.tsinghua.edu.cn/simple >> %USERPROFILE%\.pip\pip.ini
+          echo trusted-host = pypi.tuna.tsinghua.edu.cn >> %USERPROFILE%\.pip\pip.ini
+
+      - name: Install Python dependencies and PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ./Backend/requirements.txt
+          pip install --upgrade pip setuptools
+          pip install --upgrade pyinstaller
+
+      - name: Use PyInstaller to build Windows binary
+        run: pyinstaller run.spec
+
+      - name: Compress CPP-Ticket.exe into zip
+        run: powershell Compress-Archive -Path dist/CPP-Ticket.exe -DestinationPath CPP-Ticket_windows_${{ github.ref_name }}.zip
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-ticket-zip
+          path: CPP-Ticket_windows_${{ github.ref_name }}.zip
+
+  release:
+    needs: [build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows zip
+        uses: actions/download-artifact@v4
+        with:
+          name: cpp-ticket-zip
+          path: artifacts/
+
+      - name: Create GitHub Release with zip files
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            artifacts/CPP-Ticket_windows_${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_CPP_Ticket }}
