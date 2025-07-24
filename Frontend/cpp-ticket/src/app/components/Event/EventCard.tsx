@@ -83,7 +83,7 @@ const EventCard = ({ event }: props) => {
     <HoverCard.Root>
       <HoverCard.Trigger>
         <Card
-          className=" shadow-xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-[1.02] cursor-pointer h-[200px]"
+          className="group shadow-xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-[1.02] cursor-pointer h-[200px]"
           onClick={() =>
             window.open("https://cp.allcpp.cn/ticket/detail?event=" + event.id)
           }
@@ -92,7 +92,7 @@ const EventCard = ({ event }: props) => {
             <Inset clip="padding-box" side="left">
               <img
                 src={"//imagecdn3.allcpp.cn/upload" + event.appLogoPicUrl}
-                className="w-[400px] h-[200px] object-cover"
+                className="w-[400px] h-[200px] object-cover transition-transform duration-300 group-hover:scale-110"
               />
             </Inset>
             <Flex direction="column" px="5" py="3" gap="4">
@@ -130,8 +130,8 @@ const EventCard = ({ event }: props) => {
           </div>
         </Card>
       </HoverCard.Trigger>
-      <HoverCard.Content maxWidth="300px" side="right">
-        <Flex direction="column">
+      <HoverCard.Content maxWidth="300px" side="right" className="h-[200px]">
+        <Flex direction="column" justify="between" className="h-full">
           <Box>活动id {event.id}</Box>
           <Flex gap="3">
             <Box>{event.wannaGoCount} 想去</Box>|
