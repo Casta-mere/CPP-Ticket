@@ -47,7 +47,16 @@ export default function StepSidebar() {
   const Step3 = () => {
     return (
       <Flex justify="between">
-        <Text size="4">3️⃣ 选择票种</Text>
+        <Text size="4">3️⃣ 选择活动</Text>
+        <Text size="4">{ticket ? "✔" : "✖"}</Text>
+      </Flex>
+    );
+  };
+
+  const Step4 = () => {
+    return (
+      <Flex justify="between">
+        <Text size="4">4️⃣ 选择票种</Text>
         <Text size="4">{ticket ? "✔" : "✖"}</Text>
       </Flex>
     );
@@ -66,6 +75,7 @@ export default function StepSidebar() {
             <Step1 />
             <Step2 />
             <Step3 />
+            <Step4 />
           </Flex>
         </Card>
       </Box>

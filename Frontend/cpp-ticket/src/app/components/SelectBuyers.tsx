@@ -3,8 +3,10 @@ import { useSelectedBuyer, useUser, useEqual } from "@/app/components";
 import {
   Box,
   Button,
+  Card,
   CheckboxGroup,
   Flex,
+  Heading,
   Link,
   Strong,
 } from "@radix-ui/themes";
@@ -85,43 +87,49 @@ const SelectBuyers = () => {
     return (
       <Box>
         {buyerInfo && (
-          <Flex direction="column" gap="3" className="items-start">
-            <CheckboxGroup.Root
-              name="Buyers"
-              size="3"
-              value={selected}
-              onValueChange={(newSelected) => {
-                setSelected(newSelected);
-              }}
-            >
-              {buyerInfo.map((i) => {
-                const isSelected = selected.includes(String(i.id));
-                const disableOthers =
-                  selected.length >= maxSelections && !isSelected;
+          <Card>
+            <Flex direction="column" gap="3" className="items-start">
+              <Heading>选择你的英雄</Heading>
+              <CheckboxGroup.Root
+                name="Buyers"
+                size="3"
+                value={selected}
+                onValueChange={(newSelected) => {
+                  setSelected(newSelected);
+                }}
+              >
+                <Flex gap="3">
+                  {buyerInfo.map((i) => {
+                    const isSelected = selected.includes(String(i.id));
+                    const disableOthers =
+                      selected.length >= maxSelections && !isSelected;
 
-                return (
-                  <CheckboxGroup.Item
-                    key={i.id}
-                    value={String(i.id)}
-                    disabled={disableOthers}
-                  >
-                    {i.realname}
-                  </CheckboxGroup.Item>
-                );
-              })}
-            </CheckboxGroup.Root>
-            <Button
-              onClick={handleConfirm}
-              disabled={useEqual(dbSelected, selected) || confirming}
-              className="w-auto"
-            >
-              确认
-            </Button>
-          </Flex>
+                    return (
+                      <Card key={i.id}>
+                        <CheckboxGroup.Item
+                          value={String(i.id)}
+                          disabled={disableOthers}
+                        >
+                          {i.realname}
+                        </CheckboxGroup.Item>
+                      </Card>
+                    );
+                  })}
+                </Flex>
+              </CheckboxGroup.Root>
+              <Button
+                onClick={handleConfirm}
+                disabled={useEqual(dbSelected, selected) || confirming}
+                className="w-auto"
+              >
+                确认
+              </Button>
+            </Flex>
+          </Card>
         )}
         {!buyerInfo && (
           <div>
-            你似乎还没有任何购票人，点击
+            你似乎还没有添加任何购票人，点击
             <Link
               href="https://cp.allcpp.cn/ticket/prePurchaser"
               target="_blank"
