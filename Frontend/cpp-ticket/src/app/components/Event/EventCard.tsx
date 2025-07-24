@@ -22,8 +22,9 @@ const EventCard = ({ event }: props) => {
   const TicketStatus = () => {
     if (event.ticketStatus == 1) return <Badge color="gray">暂未开票</Badge>;
     if (event.ticketStatus == 2) return <Badge color="orange">即将开票</Badge>;
-    if (event.ticketStatus == 3) return <Badge color="red">售票结束</Badge>;
-    if (event.ticketStatus == 4) return <Badge color="green">正在售票</Badge>;
+    if (event.ticketStatus == 3) return <Badge color="green">正在售票</Badge>;
+    if (event.ticketStatus == 4) return <Badge color="red">售票结束</Badge>;
+    if (event.ticketStatus == 99) return <Badge color="brown">站外售票</Badge>;
   };
 
   const TimeLeft = () => {

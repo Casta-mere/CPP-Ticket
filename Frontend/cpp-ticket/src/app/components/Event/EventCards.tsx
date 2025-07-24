@@ -7,7 +7,7 @@ import React, { useState } from "react";
 
 const EventCards = () => {
   const { events } = useEvents();
-  const [selectedStatus, setSelectedStatus] = useState<string[]>(["4"]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>(["3"]);
 
   const filteredCount = events.filter((i) =>
     selectedStatus.includes(String(i.ticketStatus))
@@ -17,12 +17,12 @@ const EventCards = () => {
     <Flex gap="5" direction="column">
       <Flex align="center" gap="4">
         <CheckboxGroup.Root
-          defaultValue={["4"]}
+          defaultValue={["3"]}
           name="status"
           onValueChange={setSelectedStatus}
         >
           <Flex gap="5">
-            <CheckboxGroup.Item value="4">
+            <CheckboxGroup.Item value="3">
               <Badge color="green">正在售票</Badge>
             </CheckboxGroup.Item>
             <CheckboxGroup.Item value="1">
@@ -31,8 +31,11 @@ const EventCards = () => {
             <CheckboxGroup.Item value="2">
               <Badge color="orange">即将开票</Badge>
             </CheckboxGroup.Item>
-            <CheckboxGroup.Item value="3">
+            <CheckboxGroup.Item value="4">
               <Badge color="red">售票结束</Badge>
+            </CheckboxGroup.Item>
+            <CheckboxGroup.Item value="99">
+              <Badge color="brown">站外售票</Badge>
             </CheckboxGroup.Item>
           </Flex>
         </CheckboxGroup.Root>
