@@ -1,5 +1,10 @@
 "use client";
-import { Draggable, useSelectedBuyer, useUser } from "@/app/components";
+import {
+  Draggable,
+  useSelectedBuyer,
+  useSelectedEvent,
+  useUser,
+} from "@/app/components";
 import { Box, Card, Flex, Heading, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useState } from "react";
@@ -14,6 +19,7 @@ import {
 export default function StepSidebar() {
   const { isLoggedIn } = useUser();
   const { isSelected } = useSelectedBuyer();
+  const { isEventSelected } = useSelectedEvent();
   const [ticket, setTicket] = useState(false);
 
   const StepStatus = ({ status }: { status: boolean }) => {
@@ -79,7 +85,7 @@ export default function StepSidebar() {
             选择活动
           </span>
         </Text>
-        <StepStatus status={ticket} />
+        <StepStatus status={isEventSelected} />
       </Flex>
     );
   };

@@ -33,9 +33,11 @@ app.add_middleware(
 class LoginRequest(BaseModel):
     account: str
     password: str
-
 class selectBuyerRequest(BaseModel):
     selected: List[str]
+
+class selectEventRequest(BaseModel):
+    event_id: str
 
 @app.post("/api/login")
 async def login(req: LoginRequest):
@@ -56,7 +58,6 @@ async def userInfo():
 @app.get("/api/buyer")
 async def buyerInfo():
     return manager.get_buyer_info()
-
 
 @app.get("/api/selectBuyer")
 async def selectedBuyerInfo():
@@ -84,6 +85,15 @@ async def getEventsUpdate():
 @app.post("/api/events/update")
 async def EventsUpdate():
     ticketManager.update_events()
+
+@app.post("/api/events/select")
+async def selectEvent(req: selectEventRequest):
+    result = ticketManager.save_selected_event(req.event_id)
+    return result
+
+@app.get("/api/events/select")
+async def getSelectedEvent():
+    return {"event_id": ticketManager.get_selected_event_id()}
 
 def get_static_dir():
     if hasattr(sys, "_MEIPASS"):

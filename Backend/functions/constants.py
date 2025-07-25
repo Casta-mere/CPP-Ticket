@@ -33,6 +33,10 @@ CREATE_DB = ["""CREATE TABLE IF NOT EXISTS cookies (
                     mobile TEXT,
                     validType INTEGER
                 );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS selectedEvent (
+                    id TEXT PRIMARY KEY)
             """]
 DB_PATH = ".data/.db"
 EVENTS_FILE_PATH = ".data/.events.json"

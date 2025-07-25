@@ -1,4 +1,5 @@
-import { Event } from "@/app/types";
+"use client";
+import type { Event } from "@/app/types";
 import {
   Badge,
   Box,
@@ -11,14 +12,17 @@ import {
   Strong,
   Text,
 } from "@radix-ui/themes";
+import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import { MdAccessTime } from "react-icons/md";
 
 interface props {
   event: Event;
+  disableSelect?: boolean;
 }
 
-const EventCard = ({ event }: props) => {
+const EventCard = ({ event, disableSelect }: props) => {
+  const router = useRouter();
   const TicketStatus = () => {
     if (event.ticketStatus == 1) return <Badge color="gray">暂未开票</Badge>;
     if (event.ticketStatus == 2) return <Badge color="orange">即将开票</Badge>;
@@ -80,6 +84,25 @@ const EventCard = ({ event }: props) => {
     );
   };
 
+  const selectEvent = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8765/api/events/select", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ event_id: event.id.toString() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.dispatchEvent(new Event("event-select-change"));
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Error selecting event: ", error);
+    }
+  };
+
   return (
     <HoverCard.Root>
       <HoverCard.Trigger>
@@ -131,17 +154,19 @@ const EventCard = ({ event }: props) => {
           </div>
         </Card>
       </HoverCard.Trigger>
-      <HoverCard.Content maxWidth="300px" side="right" className="h-[200px]">
-        <Flex direction="column" justify="between" className="h-full">
-          <Box>活动id {event.id}</Box>
-          <Flex gap="3">
-            <Box>{event.wannaGoCount} 想去</Box>|
-            <Box>{event.circleCount} 社团</Box>|
-            <Box>{event.doujinshiCount} 展品</Box>
+      {!disableSelect && (
+        <HoverCard.Content maxWidth="300px" side="right" className="h-[200px]">
+          <Flex direction="column" justify="between" className="h-full">
+            <Box>活动id {event.id}</Box>
+            <Flex gap="3">
+              <Box>{event.wannaGoCount} 想去</Box>|
+              <Box>{event.circleCount} 社团</Box>|
+              <Box>{event.doujinshiCount} 展品</Box>
+            </Flex>
+            <Button onClick={selectEvent}>抢票</Button>
           </Flex>
-          <Button>抢票</Button>
-        </Flex>
-      </HoverCard.Content>
+        </HoverCard.Content>
+      )}
     </HoverCard.Root>
   );
 };

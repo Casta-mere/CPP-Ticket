@@ -1,5 +1,6 @@
 # Author: Casta-mere
-from .constants import EVENTS_URL, HEADERS, EVENTS_FILE_PATH
+from .constants import EVENTS_URL, HEADERS, EVENTS_FILE_PATH, DB_PATH
+import sqlite3
 import requests
 import logging
 from datetime import datetime
@@ -12,6 +13,20 @@ class TicketManager:
 
     def __init__(self):
         self.events = self._load_events_from_file()
+        self.selectedEventID = ""
+        self._load_if_exists()
+
+    def _get_conn(self):
+        return sqlite3.connect(DB_PATH)
+    
+    def _load_if_exists(self):
+        with self._get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM selectedEvent LIMIT 1")
+            row = cur.fetchone()
+            if row:
+                self.selectedEventID = row[0]
+                logger.info(f"Selected event ID loaded: {self.selectedEventID}")
 
     def _get_events_from_api(self):
         try:
@@ -45,6 +60,15 @@ class TicketManager:
             except json.JSONDecodeError:
                 logger.warning("JSON decode error - events file may be corrupted or empty.")
                 return []
+            
+    def save_selected_event(self, event_id):
+        with self._get_conn() as conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM selectedEvent")
+            cur.execute("INSERT INTO selectedEvent (id) VALUES (?)", (event_id,))
+            logger.info(f"Selected event ID saved: {event_id}")
+            self.selectedEventID = event_id
+            return {"success": True, "message": f"Event {event_id} selected."}
 
     def update_events(self):
         self.events = self._get_events_from_api()
@@ -71,3 +95,8 @@ class TicketManager:
             except json.JSONDecodeError:
                 logger.warning("JSON decode error - events file may be corrupted or empty.")
                 return []
+
+    def get_selected_event_id(self):
+        if self.selectedEventID:
+            return self.selectedEventID
+        return None

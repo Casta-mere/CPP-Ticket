@@ -7,6 +7,7 @@ export { default as uesEventsUpdateTime } from "./Hooks/uesEventsUpdateTime";
 export { default as useEqual } from "./Hooks/useEqual";
 export { default as useEvents } from "./Hooks/useEvents";
 export { default as useSelectedBuyer } from "./Hooks/useSelectedBuyer";
+export { default as useSelectedEvent } from "./Hooks/useSelectedEvent";
 export { default as useUser } from "./Hooks/useUser";
 export { default as NavBar } from "./Navbar/Navbar";
 export { default as SelectBuyers } from "./SelectBuyers";
