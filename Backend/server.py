@@ -11,6 +11,8 @@ from pydantic import BaseModel
 import uvicorn
 import logging
 
+STATIC_DIR_NAME = "Frontend/static"
+
 logger = logging.getLogger("uvicorn")
 
 origins = [
@@ -97,8 +99,12 @@ async def getSelectedEvent():
 
 def get_static_dir():
     if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, "Frontend/static")
-    return os.path.abspath("Frontend/static")
+        static_dir = os.path.join(sys._MEIPASS, STATIC_DIR_NAME)
+    else:
+        static_dir = os.path.abspath(STATIC_DIR_NAME)
+    if not os.path.exists(static_dir):
+        os.makedirs(static_dir, exist_ok=True)
+    return static_dir
 
 app.mount("/", StaticFiles(directory=get_static_dir(), html=True), name="static")
 
