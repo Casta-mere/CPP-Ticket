@@ -18,6 +18,7 @@ HEADERS = {
 LOGIN_URL = "https://user.allcpp.cn/api/login/normal"
 BUYER_URL = "https://www.allcpp.cn/allcpp/user/purchaser/getList.do"
 EVENTS_URL = "https://www.allcpp.cn/allcpp/event/eventMainListV2.do?time=8&sort=1&pageNo=1&pageSize=1000"
+TICKET_URL = "https://www.allcpp.cn/allcpp/ticket/getTicketTypeList.do?eventMainId="
 USER_INFO_URL = "https://user.allcpp.cn/rest/my"
 CREATE_DB = ["""CREATE TABLE IF NOT EXISTS cookies (
                     account TEXT PRIMARY KEY,

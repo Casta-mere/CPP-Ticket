@@ -1,5 +1,5 @@
 # Author: Casta-mere
-from .constants import EVENTS_URL, HEADERS, EVENTS_FILE_PATH, DB_PATH
+from .constants import EVENTS_URL, HEADERS, EVENTS_FILE_PATH, TICKET_URL, DB_PATH
 import sqlite3
 import requests
 import logging
@@ -41,7 +41,16 @@ class TicketManager:
         except Exception as e:
             logger.error(f"Error fetching events: {e}")
             return []
-        
+
+    def _get_ticket_info_from_api(self):
+        try:
+            response = requests.get(TICKET_URL + self.selectedEventID, headers=HEADERS)
+            response.raise_for_status()
+            res = response.json()
+        except Exception as e:
+            logger.error(f"Error fetching ticket info: {e}")
+            return []
+
     def _save_events_to_file(self, events):
         os.makedirs(os.path.dirname(EVENTS_FILE_PATH), exist_ok=True)
         with open(EVENTS_FILE_PATH, "w", encoding="utf-8") as f:
