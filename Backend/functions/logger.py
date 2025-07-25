@@ -11,7 +11,7 @@ class QueueHandler(logging.Handler):
         log_entry = self.format(record)
         log_queue.put(log_entry)
 
-def setup_logger(name="app", level=logging.INFO, logfile="server.log"):
+def setup_logger(name="app", level=logging.DEBUG, logfile="server.log"):
     formatter = logging.Formatter(
         '[%(asctime)s] [%(levelname)s] [%(module)s.%(funcName)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
